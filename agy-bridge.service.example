@@ -1,0 +1,21 @@
+[Unit]
+Description=Antigravity Bridge - OpenAI Compatible Local Server
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/ubuntu/agy_bridge.py
+WorkingDirectory=/home/ubuntu
+Environment="PATH=/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="HOME=/home/ubuntu"
+Environment="PYTHONUNBUFFERED=1"
+Restart=always
+RestartSec=3
+KillMode=mixed
+TimeoutStopSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
