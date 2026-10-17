@@ -58,6 +58,13 @@ AGY_BIN = get_agy_bin()
 
 MODEL_ALIASES = {
     "default": "gemini-3.8-flash-high",
+    # Gemini 4 Argon (agy models, 17/10/2026)
+    "argon": "gemini-4-argon-high",
+    "gemini-4": "gemini-4-argon-high",
+    "gemini-4-argon": "gemini-4-argon-high",
+    "gemini-4-argon-high": "gemini-4-argon-high",
+    "gemini-4-argon-medium": "gemini-4-argon-medium",
+    "gemini-4-argon-low": "gemini-4-argon-low",
     "gemini": "gemini-3.8-flash-high",
     "gemini-flash": "gemini-3.8-flash-high",
     "gemini-3.8": "gemini-3.8-flash-high",
@@ -102,6 +109,9 @@ MODEL_ALIASES = {
 }
 
 AVAILABLE_MODELS = [
+    "gemini-4-argon-high",
+    "gemini-4-argon-medium",
+    "gemini-4-argon-low",
     "gemini-3.8-flash-high",
     "gemini-3.8-flash-medium",
     "gemini-3.8-flash-low",
