@@ -135,6 +135,11 @@ AVAILABLE_MODELS = [
 ]
 
 
+# Modelo usado quando o pedido falha (erro/cota); se ele também falhar, último recurso.
+FALLBACK_PRIMARY = "gemini-3.8-flash-high"
+FALLBACK_LAST_RESORT = "gemini-3.8-flash-medium"
+
+
 def resolve_model(model_name: str) -> str:
     if not model_name:
         return "gemini-3.8-flash-high"
@@ -295,7 +300,7 @@ def call_agy_cli_stream(prompt: str, model: str, timeout: int | None = None, _al
             except Exception:
                 pass
 
-        if (last_error or not full_response) and resolved_model != "gemini-3.8-flash-medium":
+        if (last_error or not full_response) and resolved_model != FALLBACK_LAST_RESORT:
             # Erros TRANSITÓRIOS de elegibilidade/verificação da conta Antigravity
             # ("Eligibility check failed", "Verification Required") não significam
             # que o modelo está indisponível — em 25/09 eles apareceram por ~30s e
@@ -328,9 +333,15 @@ def call_agy_cli_stream(prompt: str, model: str, timeout: int | None = None, _al
                         yield ("result", retry_text, retry_usage)
                         return
 
-            logger.warning(f"AGY model '{resolved_model}' error: '{last_error}'. Fallback para gemini-3.8-flash-medium...")
+            # Cadeia de fallback (17/10/2026, pedido do Welly): qualquer modelo que
+            # falhe (ex.: cota do Claude esgotada) cai no Flash HIGH, não no Medium.
+            # Só se o próprio Flash High falhar é que desce para o Flash Medium
+            # (último recurso; o guard acima impede recursão a partir dele).
+            fallback_target = (FALLBACK_LAST_RESORT if resolved_model == FALLBACK_PRIMARY
+                               else FALLBACK_PRIMARY)
+            logger.warning(f"AGY model '{resolved_model}' error: '{last_error}'. Fallback para {fallback_target}...")
             _release_once()
-            yield from call_agy_cli_stream(prompt, "gemini-3.8-flash-medium", timeout=timeout)
+            yield from call_agy_cli_stream(prompt, fallback_target, timeout=timeout)
             return
                 
         if not full_response:
